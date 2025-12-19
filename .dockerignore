@@ -1,0 +1,60 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment files (don't include in image)
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Client code (React Native)
+client/
+
+# Tests
+test_*.py
+tests/
+*_test.py
+
+# Documentation
+*.md
+!README.md
+docs/
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+*.pyc
+
+# CI/CD
+.github/
+cloudbuild.yaml
+
+# Misc
+LICENSE
+*.txt.bak
+.dockerignore
+Dockerfile
