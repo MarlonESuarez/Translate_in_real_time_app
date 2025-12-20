@@ -1,48 +1,46 @@
 # Python
-  __pycache__/
-  *.py[cod]
-  *$py.class
-  *.so
-  .Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
 
-  # Virtual Environment
-  venv/
-  env/
-  ENV/
-  .venv
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
 
-  # Environment Variables
-  .env
-  .env.local
-  .env.production.local
+# Environment Variables
+.env
+.env.local
+.env.production.local
 
-  # Models & Voices (muy pesados)
-  # NOTA: voices/ comentado porque se necesita para deployment
-  voices/
-  *.pt
-  *.pth
-  *.bin
-  *.safetensors
-  # models/
+# Models & Voices (muy pesados)
+voices/
+*.pt
+*.pth
+*.bin
+*.safetensors
 
-  # IDE
-  .vscode/
-  .idea/
-  *.swp
-  *.swo
-  .DS_Store
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
 
-  # Logs
-  *.log
-  logs/
+# Logs
+*.log
+logs/
 
-  # Cache
-  .cache/
-  *.pyc
+# Cache
+.cache/
+*.pyc
 
 # Docker
-  *.tar
-  *.tar.gz
+*.tar
+*.tar.gz
 
 # Google Cloud
-  .gcloudignore
+.gcloudignore

@@ -78,13 +78,13 @@ curl http://localhost:8080/health
 
 ```bash
 # Establecer variables
-export PROJECT_ID=your-project-id
+export PROJECT_ID=mytranslatevoice
 export REGION=us-central1  # Cambia según tu preferencia
 
 # Build y deploy en un solo comando
 gcloud run deploy vibevoice-tts \
   --source . \
-  --region=$REGION \
+  --region=us-central1 \
   --platform=managed \
   --allow-unauthenticated \
   --memory=8Gi \

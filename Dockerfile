@@ -42,17 +42,12 @@ RUN useradd -m -u 1000 appuser && \
     chown -R appuser:appuser /app
 USER appuser
 
-# Environment variables (will be overridden by Cloud Run)
-ENV HOST=0.0.0.0
-ENV PORT=8080
+# Environment variables
 ENV PYTHONUNBUFFERED=1
 
-# Expose port
+# Expose port (Cloud Run will inject PORT automatically)
 EXPOSE 8080
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
-    CMD python -c "import requests; requests.get('http://localhost:8080/health')"
-
 # Start server
-CMD exec uvicorn app.main:app --host ${HOST} --port ${PORT} --workers 1
+# Cloud Run provides PORT env variable automatically
+CMD exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8080} --workers 1

@@ -26,3 +26,6 @@
 
   # HuggingFace Hub (para descargar voces)
   huggingface-hub
+
+# VibeVoice TTS (Microsoft)
+  git+https://github.com/microsoft/VibeVoice.git

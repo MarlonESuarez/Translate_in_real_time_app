@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+import os
 from pathlib import Path
 from typing import AsyncIterator, Optional, Dict
 import asyncio
@@ -42,6 +43,9 @@ class TTSService:
     
     def _load_sync(self):
             """Synchronous model loading."""
+            # Get HuggingFace token from environment
+            hf_token = os.getenv("HF_TOKEN")
+
             # Determine device
             if self.device == "cuda":
                 dtype = torch.float16
@@ -54,7 +58,10 @@ class TTSService:
                 attn = "sdpa"
 
             print(f"Loading model from {self.model_path} with dtype {dtype} and attention {attn}")
-            self.processor = VibeVoiceStreamingProcessor.from_pretrained(self.model_path)
+            self.processor = VibeVoiceStreamingProcessor.from_pretrained(
+                self.model_path,
+                token=hf_token
+            )
 
             # Load model
             print("Loading model weights...")
@@ -63,7 +70,8 @@ class TTSService:
                     self.model_path,
                     torch_dtype=dtype,
                     device_map=self.device,
-                    attn_implementation=attn
+                    attn_implementation=attn,
+                    token=hf_token
                 )
                 print("Model weights loaded successfully.")
             except Exception as e:
@@ -73,7 +81,8 @@ class TTSService:
                         self.model_path,
                         torch_dtype=dtype,
                         device_map=self.device,
-                        attn_implementation="sdpa"
+                        attn_implementation="sdpa",
+                        token=hf_token
                     )
                     print("Model weights loaded successfully with SDPA.")
                 else:
