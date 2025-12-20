@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from app.models.schemas import HealthResponse
-from app.services.tts_service import TTSService
+from app.services.tts_service import tts_service
 
 router = APIRouter(prefix="/health", tags=["Health"])
 
