@@ -1,0 +1,51 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# Environment Variables
+.env
+.env.local
+.env.production.local
+
+# Models & Voices (muy pesados)
+voices/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
+# Audio files (test outputs)
+*.wav
+*.mp3
+*.ogg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+*.pyc
+
+# Docker
+*.tar
+*.tar.gz
+
+# Google Cloud
+.gcloudignore
