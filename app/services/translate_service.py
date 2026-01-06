@@ -26,8 +26,24 @@ class TranslateService:
         print("Initializing Google Cloud Translate...")
         print(f"Project ID: {self.project_id}")
 
-        # Set credentials if provided
-        if self.credentials_path and os.path.exists(self.credentials_path):
+        # Handle credentials from environment variable (for Hugging Face Spaces)
+        credentials_json = os.getenv("GOOGLE_APPLICATION_CREDENTIALS_JSON")
+        if credentials_json:
+            import json
+            import tempfile
+
+            print("Found GOOGLE_APPLICATION_CREDENTIALS_JSON in environment")
+
+            # Create temporary file with credentials
+            with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+                json.dump(json.loads(credentials_json), f)
+                temp_creds_path = f.name
+
+            os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = temp_creds_path
+            print(f"Created temporary credentials file: {temp_creds_path}")
+
+        # Set credentials if provided as file path
+        elif self.credentials_path and os.path.exists(self.credentials_path):
             os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = self.credentials_path
             print(f"Using credentials from: {self.credentials_path}")
 
