@@ -123,8 +123,9 @@ class TranslateService:
         return {
             "original_text": text,
             "translated_text": result["translatedText"],
-            "detected_source_lang": result.get("detectedSourceLanguage", source_lang),
-            "target_lang": target_lang
+            "source_lang": source_lang or result.get("detectedSourceLanguage", "auto"),
+            "target_lang": target_lang,
+            "detected_source_lang": result.get("detectedSourceLanguage", source_lang)
         }
 
     async def detect_language(self, text: str) -> str:
