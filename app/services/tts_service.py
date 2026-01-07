@@ -30,9 +30,10 @@ class TTSService:
           self.model: Optional[VibeVoiceStreamingForConditionalGenerationInference] = None
           self.processor: Optional[VibeVoiceStreamingProcessor] = None
           self.voice_presets: Dict[str, Path] = {}
+          self.voice_cache: Dict[str, any] = {}  # Cache for loaded voice presets
           self.default_voice_key = settings.DEFAULT_VOICE
           self.sample_rate = 24000
-          self._executor = ThreadPoolExecutor(max_workers=1)
+          self._executor = ThreadPoolExecutor(max_workers=3)  # Increased from 1 to 3
     
     async def load(self):
             """Load the TTS model and voice presets."""
@@ -106,11 +107,11 @@ class TTSService:
 
             if not voices_dir.exists():
                 raise RuntimeError(f"Voices directory not found: {voices_dir}")
-            
+
             for pt_file in voices_dir.glob("*.pt"):
                 voice_name = pt_file.stem
                 self.voice_presets[voice_name] = pt_file
-            
+
             if not self.voice_presets:
                 raise RuntimeError("No voice presets found.")
 
@@ -118,6 +119,24 @@ class TTSService:
             if self.default_voice_key not in self.voice_presets:
                 self.default_voice_key = list(self.voice_presets.keys())[0]
                 print(f"Default voice not found. Using {self.default_voice_key} as default.")
+
+            # Pre-cache most commonly used voices to reduce latency
+            common_voices = ["en-Carter_man", "sp-Spk1_man", "en-Emma_woman", "sp-Spk0_woman"]
+            print("Pre-caching common voice presets...")
+            for voice_key in common_voices:
+                if voice_key in self.voice_presets:
+                    try:
+                        voice_path = self.voice_presets[voice_key]
+                        cached_prompt = torch.load(
+                            voice_path,
+                            map_location=self.device,
+                            weights_only=False
+                        )
+                        self.voice_cache[voice_key] = cached_prompt
+                        print(f"  ✓ Cached voice preset: {voice_key}")
+                    except Exception as e:
+                        print(f"  ✗ Failed to cache {voice_key}: {e}")
+            print(f"Voice cache ready with {len(self.voice_cache)} presets")
     
     async def generate_stream(
         self,
@@ -130,16 +149,24 @@ class TTSService:
         
         # select voice
         voice = voice_key if voice_key in self.voice_presets else self.default_voice_key
-        voice_path = self.voice_presets[voice]
 
         print(f"Generating audio with voice: {voice}")
 
-        # load cached prompt
-        # Note: weights_only=False is required because voice presets contain model objects
-        # These files come from Microsoft's official VibeVoice repo and are trusted
-        prefilled_outputs = await asyncio.to_thread(
-            lambda: torch.load(voice_path, map_location=self.device, weights_only=False)
-        )
+        # Try to use cached voice preset, otherwise load from disk
+        if voice in self.voice_cache:
+            print(f"  ✓ Using cached voice preset: {voice}")
+            prefilled_outputs = self.voice_cache[voice]
+        else:
+            print(f"  ⚠ Voice not cached, loading from disk: {voice}")
+            voice_path = self.voice_presets[voice]
+            # Note: weights_only=False is required because voice presets contain model objects
+            # These files come from Microsoft's official VibeVoice repo and are trusted
+            prefilled_outputs = await asyncio.to_thread(
+                lambda: torch.load(voice_path, map_location=self.device, weights_only=False)
+            )
+            # Cache it for next time
+            self.voice_cache[voice] = prefilled_outputs
+            print(f"  ✓ Cached voice preset for future use: {voice}")
 
         # prepare inputs
         inputs =  self.processor.process_input_with_cached_prompt(
