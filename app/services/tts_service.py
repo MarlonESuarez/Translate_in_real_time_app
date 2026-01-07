@@ -4,6 +4,7 @@ import os
 from pathlib import Path
 from typing import AsyncIterator, Optional, Dict
 import asyncio
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 from vibevoice import (
@@ -34,6 +35,7 @@ class TTSService:
           self.default_voice_key = settings.DEFAULT_VOICE
           self.sample_rate = 24000
           self._executor = ThreadPoolExecutor(max_workers=3)  # Increased from 1 to 3
+          self._generation_lock = threading.Lock()  # Lock to serialize model.generate() calls
     
     async def load(self):
             """Load the TTS model and voice presets."""
@@ -187,33 +189,39 @@ class TTSService:
         audio_streamer = AudioStreamer(
              batch_size=1
         )
-        self.model.set_ddpm_inference_steps(num_steps=inference_steps)
-        print(f"DDPM inference steps set to {inference_steps}.")
+
         # Generate in thread separately (using threading.Thread like official demo)
         import copy
-        import threading
 
         errors = []
 
         def run_generation_sync():
             try:
                 print("Starting model.generate() in thread...")
-                result = self.model.generate(
-                    **inputs,
-                    max_new_tokens=None,
-                    cfg_scale=cfg_scale,
-                    tokenizer=self.processor.tokenizer,
-                    generation_config={
-                        'do_sample': False,
-                        'temperature': 1.0,
-                        'top_p': 1.0
-                    },
-                    audio_streamer=audio_streamer,
-                    verbose=True,
-                    refresh_negative=True,
-                    all_prefilled_outputs=copy.deepcopy(prefilled_outputs)
-                )
-                print(f"Generation completed successfully")
+
+                # CRITICAL: Use lock to serialize model access
+                # The noise_scheduler has internal state that is NOT thread-safe
+                with self._generation_lock:
+                    print("Acquired generation lock, configuring scheduler...")
+                    self.model.set_ddpm_inference_steps(num_steps=inference_steps)
+                    print(f"DDPM inference steps set to {inference_steps}.")
+
+                    result = self.model.generate(
+                        **inputs,
+                        max_new_tokens=None,
+                        cfg_scale=cfg_scale,
+                        tokenizer=self.processor.tokenizer,
+                        generation_config={
+                            'do_sample': False,
+                            'temperature': 1.0,
+                            'top_p': 1.0
+                        },
+                        audio_streamer=audio_streamer,
+                        verbose=True,
+                        refresh_negative=True,
+                        all_prefilled_outputs=copy.deepcopy(prefilled_outputs)
+                    )
+                    print(f"Generation completed successfully, releasing lock")
                 return result
             except Exception as e:
                 print(f"ERROR in generation thread: {e}")
