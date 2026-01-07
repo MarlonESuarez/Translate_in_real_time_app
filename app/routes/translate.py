@@ -59,7 +59,7 @@ async def handle_translation_request(
         target_lang = data.get("target_lang", "en")
         voice = data.get("voice")
         cfg = float(data.get("cfg", 1.5))
-        steps = int(data.get("steps", 3))  # Reduced default from 5 to 3
+        steps = int(data.get("steps", 5))  # DPM-Solver++ requires minimum 5 steps
 
         if not text:
             await websocket.send_json({

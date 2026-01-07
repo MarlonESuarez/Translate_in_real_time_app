@@ -7,7 +7,7 @@ class TTSRequest(BaseModel):
     text: str = Field(..., min_length=1, max_length=5000, description="The text to be converted to speech.")
     voice: Optional[str] = Field(None, description="The voice model to use for synthesis.")
     cfg_scale: Optional[float] = Field(1.5, ge=0.5, le=3.0, description="CFG scale for controlling creativity of the output.")
-    inference_steps: Optional[int] = Field(3, ge=3, le=20, description="Number of inference steps for generation (reduced for faster generation).")
+    inference_steps: Optional[int] = Field(5, ge=5, le=20, description="Number of inference steps for generation.")
 
 class TranslateRequest(BaseModel):
     """Schema for translation request payload."""
@@ -33,7 +33,7 @@ class TranslateTTSRequest(BaseModel):
     target_lang: str = Field("en", description="Target language code")
     voice: Optional[str] = Field(None, description="Voice for TTS (language-appropriate)")
     cfg_scale: Optional[float] = Field(1.5, ge=0.5, le=3.0, description="CFG scale")
-    inference_steps: Optional[int] = Field(3, ge=3, le=20, description="Inference steps (reduced for faster generation)")
+    inference_steps: Optional[int] = Field(5, ge=5, le=20, description="Inference steps")
 
 class SupportedLanguagesResponse(BaseModel):
     """Schema for supported languages list."""
