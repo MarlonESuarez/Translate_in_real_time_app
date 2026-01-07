@@ -95,6 +95,17 @@ class TranslateService:
         if source_lang and not self.is_language_supported(source_lang):
             raise ValueError(f"Source language '{source_lang}' not supported")
 
+        # Skip translation if source and target are the same
+        if source_lang and source_lang == target_lang:
+            print(f"⚠️ Same language detected (source={source_lang}, target={target_lang}), skipping translation")
+            return {
+                "original_text": text,
+                "translated_text": text,  # Return original text
+                "source_lang": source_lang,
+                "target_lang": target_lang,
+                "detected_source_lang": source_lang
+            }
+
         # Perform translation in thread (API is synchronous)
         result = await asyncio.to_thread(
             self._translate_sync,
