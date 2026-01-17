@@ -11,6 +11,13 @@ env/
 ENV/
 .venv
 
+# Models & Voices (huge files with old timestamps)
+voices/
+*.pt
+*.pth
+*.bin
+*.safetensors
+
 # Environment files (don't include in image)
 .env
 .env.local

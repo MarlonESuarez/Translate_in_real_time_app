@@ -49,3 +49,6 @@ logs/
 
 # Google Cloud
 .gcloudignore
+
+
+mytranslatevoice-ce9c3b3cec72.json
